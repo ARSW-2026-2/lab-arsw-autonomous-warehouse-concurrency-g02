@@ -20,20 +20,21 @@ public class PackageQueue {
     }
 
     public Parcel takeNext() {
-        // Deliberate check-then-act race condition.
-        if (pending.isEmpty()) {
-            return null;
+        synchronized (pending) {
+            if (pending.isEmpty()) {
+                return null;
+            }
+
+            Parcel selected = pending.get(0);
+            Thread.yield();
+            pending.remove(0);
+            return selected;
         }
-
-        Parcel selected = pending.get(0);
-        Thread.yield();
-
-        // Another thread may have changed the list between get(0) and remove(0).
-        pending.remove(0);
-        return selected;
     }
 
     public int pendingCount() {
-        return pending.size();
+        synchronized (pending) {
+            return pending.size();
+        }
     }
 }
