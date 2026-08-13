@@ -9,13 +9,15 @@ public class WarehouseStatistics {
     private long totalProcessingMillis;
 
     public void recordProcessed(long elapsedMillis) {
-        int current = processedParcels;
-        Thread.yield();
-        processedParcels = current + 1;
+        synchronized (this) {
+            int current = processedParcels;
+            Thread.yield();
+            processedParcels = current + 1;
 
-        long accumulated = totalProcessingMillis;
-        Thread.yield();
-        totalProcessingMillis = accumulated + elapsedMillis;
+            long accumulated = totalProcessingMillis;
+            Thread.yield();
+            totalProcessingMillis = accumulated + elapsedMillis;
+        }
     }
 
     public int processedParcels() {

@@ -52,7 +52,32 @@ The final result depends on the exact sequence of CPU scheduling because the ope
 
 ## 4. System invariants
 
+#### Candidate Invariants Evaluation
+*   **Every parcel is processed at most once:** Required.
+*   **No parcel disappears from the system:** Required.
+*   **Arrival positions are unique:** Required.
+*   **Arrival positions form a valid sequence from 1..N:** Required.
+*   **The processed counter matches the number of delivery records:** Derived (it is a consequence of ensuring no lost updates occur in either the registry or the statistics counters, but it's a vital assertion to verify system health).
+*   **When the simulation is reported as complete, no parcels remain pending:** Required.
+
+#### Final Set of Invariants
+*   **I1 (Conservation of Parcels):** The number of `pending` parcels plus the number of `deliveries` recorded in the registry must always equal the `initialParcels` count.
+*   **I2 (Unique & Sequential Positions):** The `DeliveryRegistry` must assign strictly sequential, gapless, and unique arrival positions (1, 2, 3...) to each processed parcel.
+*   **I3 (Counter Integrity):** The `processedParcels` counter in `WarehouseStatistics` must exactly match the number of elements in the `DeliveryRegistry`'s `deliveries` list at any given moment.
+*   **I4 (At-Most-Once Processing):** No parcel is processed or registered more than once (indicated by the strict uniqueness of `parcelId` in the registry).
+
+
 ## 5. Critical regions and synchronization decisions
+
+| Class | Critical region | Protected invariant | Synchronization mechanism | Why this granularity? |
+| :--- | :--- | :--- | :--- | :--- |
+| **PackageQueue** | The body of `takeNext()` and `pendingCount()`. | I4 (At-Most-Once Processing). | `synchronized(pending)` block. | The entire check-and-remove operation must be atomic. Synchronizing on the list ensures no other thread can evaluate `isEmpty()` while a removal is in progress. |
+| **DeliveryRegistry** | The body of `register()` and `snapshot()`. | I2 (Unique & Sequential Positions). | `synchronized(this)` block. | Both the `nextPosition` increment and `deliveries.add()` must be mutually exclusive as a single atomic unit to avoid duplicate assignment of positions. |
+| **WarehouseStatistics** | The body of `recordProcessed()` and the getters. | I3 (Counter Integrity). | `synchronized(this)` block and methods. | The read-modify-write cycle of the primitive counters must be protected. Synchronizing the entire update block prevents lost updates. |
+
+**Answer:**
+**What would happen to throughput if the protected region were unnecessarily large?**
+If the protected region were too large (for example, synchronizing the robot's entire `process()` method inside the `WarehouseRobot` class or using one global lock for the whole simulation), the threads would execute sequentially rather than concurrently. Throughput would plummet because workers would be blocked waiting for the lock even when performing independent and time-consuming tasks. This would completely defeat the purpose of multithreading, increasing the overall execution time.
 
 ## 6. Thread completion and pause/resume coordination
 

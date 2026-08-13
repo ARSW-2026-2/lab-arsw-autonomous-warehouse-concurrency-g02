@@ -21,7 +21,8 @@ public class DeliveryRegistry {
     }
 
     public List<DeliveryRecord> snapshot() {
-        // Intentionally not coordinated with concurrent writes.
-        return List.copyOf(deliveries);
+        synchronized (this) {
+            return List.copyOf(deliveries);
+        }
     }
 }
