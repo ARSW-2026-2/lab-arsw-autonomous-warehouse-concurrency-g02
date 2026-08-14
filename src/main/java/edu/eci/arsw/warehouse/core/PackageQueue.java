@@ -26,7 +26,6 @@ public class PackageQueue {
             }
 
             Parcel selected = pending.get(0);
-            Thread.yield();
             pending.remove(0);
             return selected;
         }
