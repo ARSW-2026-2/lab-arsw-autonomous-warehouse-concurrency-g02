@@ -307,7 +307,9 @@ Explain:
 
 > How do you know the snapshot represents a consistent state rather than workers that are still changing shared data?
 
-> _Write your answer here._
+> We can guarantee the snapshot's consistency because all the methods we modified in classes such as `simulationControl` and `WarehouseMain` are `synchronized`; consequently, no thread can access them while another is using them. Furthermore, when the simulation is paused, the robots finish processing their current package and then wait, adhering to the implemented logic.
+
+> Therefore, the requested values—Processed parcels, Pending parcels, Registry size, and Current leader—reflect the data as it stands at that moment.
 
 ---
 
