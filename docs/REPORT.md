@@ -80,6 +80,15 @@ The final result depends on the exact sequence of CPU scheduling because the ope
 If the protected region were too large (for example, synchronizing the robot's entire `process()` method inside the `WarehouseRobot` class or using one global lock for the whole simulation), the threads would execute sequentially rather than concurrently. Throughput would plummet because workers would be blocked waiting for the lock even when performing independent and time-consuming tasks. This would completely defeat the purpose of multithreading, increasing the overall execution time.
 
 ## 6. Thread completion and pause/resume coordination
+In this part, in the WarehouseMain.java, we can see a problem because after to start the simulation, we have a problem that the code use `Thread.sleep(...)` and this have problems because the programmer put any time, and nobody knows if the simulation progressed or finished during this time, which is causing us problems, so we switched to using an implementation that was already used in WarehouseSimulation, that the robot use the `join()`, this implementation called `awaitCompletion()`.
+
+Document:
+
+> Why is `Thread.sleep(...)` not a valid substitute for `join()` when waiting for a worker to finish?
+
+> `Thread.sleep(...)` is not a valid substitute for `join()` because the goal is for the process to continue once the robots finish their tasks; however, using `Thread.sleep(60)` relies on the assumption that the robots will have advanced or completed their work within 60ms—something that isn't guaranteed. In contrast, using `join()` ensures that the program waits for the target thread to finish before proceeding.
+
+> Furthermore, `join()` guarantees that everything a thread has done prior to completion is visible to the next thread—a guarantee not provided by the previously mentioned method.
 
 ## 7. Verification results
 

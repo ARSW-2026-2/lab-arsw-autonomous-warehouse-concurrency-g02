@@ -263,7 +263,9 @@ Document:
 
 > Why is `Thread.sleep(...)` not a valid substitute for `join()` when waiting for a worker to finish?
 
-> _Write your answer here._
+> `Thread.sleep(...)` is not a valid substitute for `join()` because the goal is for the process to continue once the robots finish their tasks; however, using `Thread.sleep(60)` relies on the assumption that the robots will have advanced or completed their work within 60ms—something that isn't guaranteed. In contrast, using `join()` ensures that the program waits for the target thread to finish before proceeding.
+
+> Furthermore, `join()` guarantees that everything a thread has done prior to completion is visible to the next thread—a guarantee not provided by the previously mentioned method.
 
 ---
 
