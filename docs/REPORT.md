@@ -80,6 +80,8 @@ The final result depends on the exact sequence of CPU scheduling because the ope
 If the protected region were too large (for example, synchronizing the robot's entire `process()` method inside the `WarehouseRobot` class or using one global lock for the whole simulation), the threads would execute sequentially rather than concurrently. Throughput would plummet because workers would be blocked waiting for the lock even when performing independent and time-consuming tasks. This would completely defeat the purpose of multithreading, increasing the overall execution time.
 
 ## 6. Thread completion and pause/resume coordination
+
+### Thread Completion:
 In this part, in the WarehouseMain.java, we can see a problem because after to start the simulation, we have a problem that the code use `Thread.sleep(...)` and this have problems because the programmer put any time, and nobody knows if the simulation progressed or finished during this time, which is causing us problems, so we switched to using an implementation that was already used in WarehouseSimulation, that the robot use the `join()`, this implementation called `awaitCompletion()`.
 
 Document:
@@ -89,6 +91,15 @@ Document:
 > `Thread.sleep(...)` is not a valid substitute for `join()` because the goal is for the process to continue once the robots finish their tasks; however, using `Thread.sleep(60)` relies on the assumption that the robots will have advanced or completed their work within 60ms—something that isn't guaranteed. In contrast, using `join()` ensures that the program waits for the target thread to finish before proceeding.
 
 > Furthermore, `join()` guarantees that everything a thread has done prior to completion is visible to the next thread—a guarantee not provided by the previously mentioned method.
+
+### Pause/Resume:
+In this part we modify the class `SimulationControl` to add the implementation that the Lab say, in the pause of the robots, then the pause, we put the `notifyAll()`, what guarantees us that all the threads will know.
+ 
+> How do you know the snapshot represents a consistent state rather than workers that are still changing shared data?
+
+> We can guarantee the snapshot's consistency because all the methods we modified in classes such as `simulationControl` and `WarehouseMain` are `synchronized`; consequently, no thread can access them while another is using them. Furthermore, when the simulation is paused, the robots finish processing their current package and then wait, adhering to the implemented logic.
+
+> Therefore, the requested values—Processed parcels, Pending parcels, Registry size, and Current leader—reflect the data as it stands at that moment.
 
 ## 7. Verification results
 
