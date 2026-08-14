@@ -20,11 +20,11 @@ public class WarehouseStatistics {
         }
     }
 
-    public int processedParcels() {
+    public synchronized int processedParcels() {
         return processedParcels;
     }
 
-    public long totalProcessingMillis() {
+    public synchronized long totalProcessingMillis() {
         return totalProcessingMillis;
     }
 }
