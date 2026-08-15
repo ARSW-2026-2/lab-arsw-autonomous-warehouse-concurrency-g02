@@ -8,24 +8,31 @@ package edu.eci.arsw.warehouse.core;
  */
 public class SimulationControl {
 
-    private volatile boolean paused;
+    private boolean paused;
 
-    public void pause() {
+    public synchronized void pause() {
         paused = true;
     }
 
-    public void resume() {
+    public synchronized void resume() {
         paused = false;
+        notifyAll();
     }
 
-    public void awaitIfPaused() {
-        // TODO LAB 2: replace busy waiting with monitor coordination.
+    public synchronized void awaitIfPaused() {
+        // TODO LAB 2: Completed
         while (paused) {
-            Thread.onSpinWait();
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            
         }
     }
 
-    public boolean isPaused() {
+    public synchronized boolean isPaused() {
         return paused;
     }
 }

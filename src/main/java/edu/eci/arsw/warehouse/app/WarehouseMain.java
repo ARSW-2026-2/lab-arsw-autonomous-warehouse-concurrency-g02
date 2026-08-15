@@ -21,10 +21,12 @@ public final class WarehouseMain {
 
         // Intentionally wrong architecture-level coordination:
         // the application reports a "final" state before workers have finished.
-        Thread.sleep(60);
-        System.out.println("\n--- STARTER REPORT (intentionally premature) ---");
+        
+        // Problem solutionated with the indication of part IV.
+        simulation.awaitCompletion();
+        System.out.println("\n--- FINAL REPORT ---");
         printSnapshot(simulation.snapshot());
-        System.out.println("----------------------------------------------\n");
+        System.out.println("----------------------\n");
 
         // The JVM stays alive because robot threads are non-daemon threads.
         // TODO LAB 2: coordinate completion explicitly with join() and print exactly one
