@@ -333,10 +333,10 @@ A correct result once is not sufficient.
 Run at least three configurations:
 
 | Robots | Parcels | Runs | Anomalies before | Anomalies after |
-|---:|---:|---:|---:|---:|
-| 8 | 100 |  |  |  |
-| 16 | 250 |  |  |  |
-| 32 | 500 |  |  |  |
+|---:|---:|-----:|---:|----------------:|
+| 8 | 100 |  100 |  |               0 |
+| 16 | 250 |  150 |  |               0 |
+| 32 | 500 |  200 |  |               0 |
 
 ---
 
@@ -349,18 +349,41 @@ This laboratory is about more than Java syntax.
 For your main synchronization decision answer:
 
 - What problem were you solving?
+
+**The core problem was the existence of multiple threads accessing and modifying a shared mutable state without any concurrency control. This generated race conditions, resulting in lost parcels, duplicated processing, etc. Besides the systems used active waiting for pause control wasting a lot of CPU cycles.**
 - What invariant had to be preserved?
+
+**- No parcel should be lost or processed more than once**
+
+**- The total parcels must exactly match the size of the delivery registry**
+
+**- State reports during a pause must show a consistent state where no threads are modifying information midway through a transaction.**
 - What alternatives did you consider?
+
+**- Global synchronization like adding the synchronized keyword to absolutely all methods of the shared classes.**
+
+**- Using concurrent structures and specific monitors replacing unsafe standard collections with concurrency-optimized versions and barely using synchronized blocks strictly for thread coordination.**
 - Why did you choose the final mechanism?
+
+**The second alternative was chosen because applying synchronization at the method level indiscriminately would have turned the concurrency into a secuential execution creating like bottlenecks.** 
 - What are its consequences?
+
+**The systems now has a lot of quality managing thread-safety, passing the tests from RaceConditionProbe with zero anomalies. But the logic gets slightly more complex**
 
 ## 2. Quality attributes
 
 Discuss the impact of your solution on at least:
 
 - **Correctness / reliability**
+
+**The impact is very positive. The system before was non-deterministic but now it can be predictable and very consistent, keeping consistency in the business rules.**
 - **Performance / throughput**
+
+**Performance improved significantly compared to a potential global lock solution with synchronized blocks. By reducing the size of the critical regions, threads can process parcels concurrently, besides, eliminating the paused loop and replacing it with wait, we improved the throughput of the machine.**
+
 - **Maintainability**
+
+**Although the complex of the code slightly increased we could encapsule the synchronization logic, most of the code remained clean and focused on the workflow logic.
 
 ## 3. Architectural boundary question
 
@@ -369,9 +392,11 @@ Assume tomorrow the warehouse is deployed as **three independent JVM instances**
 Answer:
 
 > Would your `synchronized` blocks still protect the business invariant across all three instances? Why or why not?
+- **No, because java monitors and keywords like synchronized operate exclusively at the internal memory level of a JVM. If there are 3 instances deployed there are 3 JVM's with 3 distinct memory spaces. A lock on thread 1 don't have visibility over the second one.** 
 
 > What type of architectural mechanism would then be required?
 
+**Distributed Locking using a fast data store like Redis or Apache ZooKeeper to create a central lock. Before processing a parcel, an instance must request the lock in Redis; if another instance holds it, the current one must wait.
 Do not implement a distributed solution. Analyze it.
 
 ---
