@@ -11,11 +11,11 @@
 
 ## 0. Información del equipo
 
-| Integrante | Código / ID | GitHub |
-|---|---|---|
-| Cristian Aristizabal| 1000104617 | Cristian-Aristi |
-| Daniel Peña | | |
-| Santiago Pinzón | | |
+| Integrante | Código / ID | GitHub          |
+|---|-------------|-----------------|
+| Cristian Aristizabal| 1000104617  | Cristian-Aristi |
+| Daniel Peña |             |                 |
+| Santiago Pinzón | 1000103871  | els4nty         |
 
 **Repositorio:**  
 `https://github.com/ARSW-2026-2/lab-arsw-autonomous-warehouse-concurrency-g02.git`
